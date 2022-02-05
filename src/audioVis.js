@@ -610,9 +610,10 @@ function Graphics(){
     canvas.style.left = "0px";
     canvas.style.position = "absolute";
     document.body.appendChild(canvas);
+    document.body.addEventListener('resize', this.resize);
 
     shaders.vertexShaders.fade = buildShader(shaderSources.fadeVertexShader, gl.VERTEX_SHADER);
-    shaders.fragmentShaders.fade = buildShader(shaderSources.fadeFragmentShader, gl.FRAGMENT_SHADER);
+    shaders.fragmentShaders.fade = buildShader(shaderSources.altFadeFragmentShader, gl.FRAGMENT_SHADER);
     programs.fade = buildProgram(shaders.vertexShaders.fade, shaders.fragmentShaders.fade);
     gl.useProgram(programs.fade);
     attributes.fade.pos = gl.getAttribLocation(programs.fade, "pos");
@@ -1057,67 +1058,63 @@ var Sound = {
     }
 }
 
+function createCSSClass(className, styling){
+    var styleElement = document.createElement('style');
+    styleElement.innerHTML = `.${className}{${styling}}`;
+    document.getElementsByTagName('head')[0].appendChild(styleElement);
+    return styleElement;
+}
+
 /**
  * @param {{ [x: string]: {normal:string, hover:string}; }} stateSVGMapping
  */
 function DynamicButton(stateSVGMapping){
-    this.button = document.createElement("span");
-    var svgCollection = {};
-    var button = this.button;
-    button.style.textAlign = "center";
-    button.style.display = "inline-block";
-    button.style.height = "100%";
     var self = this;
-    
-    for(var map in stateSVGMapping){
-        var myImg = document.createElement("img");
-        var myImg2 = document.createElement("img");
-        myImg.src = stateSVGMapping[map].hover;
-        myImg2.src = stateSVGMapping[map].normal;
-        myImg.style.width = "100%";
-        myImg2.style.width = "100%";
-        myImg.style.maxHeight = "100%";
-        myImg2.style.maxHeight = "100%"
-        svgCollection[map] = {
-            normal:myImg2,
-            hover:myImg
-        }
-    }
-
+    this.button = document.createElement('span');
+    var button = this.button;
+    var id = DynamicButton.count ++;
+    var styleNamePrefix = `DynamicButton${id}`;
+    button.classList.add('dynamicButton');
     this.state = "";
 
-    function clearChildren(){
-        while (button.firstChild){
-            button.removeChild(button.firstChild);
-        }
+    for(var stateName in stateSVGMapping){
+        var classTitle = `${styleNamePrefix}${stateName}`;
+        var styling = `\nbackground-image: url(${stateSVGMapping[stateName].normal});\n`;
+        createCSSClass(classTitle, styling);
+        styling = `\nbackground-image: url(${stateSVGMapping[stateName].hover});\n`;
+        createCSSClass(classTitle+":hover", styling);
     }
 
     function hover(){
         if(stateSVGMapping[self.state]){
-            clearChildren();
-            button.appendChild(svgCollection[self.state].hover);
+            //button.style.backgroundImage = `url(${stateSVGMapping[self.state].hover})`;
+
         }
     }
 
     function out(){
         if(stateSVGMapping[self.state]){
-            clearChildren();
-            button.appendChild(svgCollection[self.state].normal);
+            //button.style.backgroundImage = `url(${stateSVGMapping[self.state].normal})`;
         }
     }
     button.addEventListener("mouseover", hover);
     button.addEventListener("mouseout", out);
-    button.classList.add("DynamicButtonContainer");
+    //button.classList.add("DynamicButtonContainer");
 
     this.setState = function(name=""){
         
-        self.state = name;
+        
         if(stateSVGMapping[name]){
-            out()
+            //out()
+            button.classList.remove(styleNamePrefix + self.state);
+            button.classList.add(styleNamePrefix + name);
+            self.state = name;
         }
     }
 
 }
+
+DynamicButton.count = 0;
 
 /**
  * @param {TrackPlayer} player
@@ -1971,6 +1968,7 @@ var _Player = {
 
 var testPlayer = new TrackPlayer();
 var testDecoder = new TrackMetaDataDecoder();
+/**@type {Graphics} */
 var graphicPlayer = null;
 
 
