@@ -8,21 +8,11 @@ var canvas = document.getElementById("can");
 var ct = canvas.getContext("2d");
 
 
-function Cube(x, y, z, size, color, light,/**@type{Graphics} */ graphics, musicSection = Math.floor(Math.random() * Sound.data.fbc)) {
+function Cube(x, y, z, size, color, light,/**@type{Graphics} */ graphics, musicSection=Math.floor(Math.random() * Sound.data.fbc)) {
 
-    var yOffset = 0;
-    var ox = 0;//orbit point
-    var oy = 0;
-    var oz = -650;
     var power = 0;
     var oldPower = 0;
     var dp = 0; //difference in power.
-    var tilt = (Math.random() - 0.5) * 60;
-    var orbit = Math.random() * 360;
-    var tiltOffset = Math.random() * 360 / 180 * Math.PI;//so all the cubes don't make an x
-    var maxDistance = 3000;
-    var minDistance = 100;
-    var orbitDistance = 300;
     this.musicSection = musicSection;
     var scale = 1;//how the model is scaled
     var beatPoints = 0;
@@ -65,40 +55,41 @@ function Cube(x, y, z, size, color, light,/**@type{Graphics} */ graphics, musicS
         //half size
         var hs = size / 2;
         var c = color;
+        // Face direction, flipped if light source
         var f = 1;
         if (light > -1) {
             f = -1;
         }
         var anotherArray = [
-            -hs, hs, hs, c[0], c[1], c[2], 0, 0, 1 * f, 0, 0,//front
-            hs, -hs, hs, c[0], c[1], c[2], 0, 0, 1 * f, 1, 1,
-            hs, hs, hs, c[0], c[1], c[2], 0, 0, 1 * f, 1, 0,
-            -hs, -hs, hs, c[0], c[1], c[2], 0, 0, 1 * f, 0, 1,
+            -hs,  hs,  hs, c[0], c[1], c[2], 0, 0,  1 * f, 0, 0,//front
+             hs, -hs,  hs, c[0], c[1], c[2], 0, 0,  1 * f, 1, 1,
+             hs,  hs,  hs, c[0], c[1], c[2], 0, 0,  1 * f, 1, 0,
+            -hs, -hs,  hs, c[0], c[1], c[2], 0, 0,  1 * f, 0, 1,
 
-            -hs, hs, -hs, c[0], c[1], c[2], -1 * f, 0, 0, 0, 0,//left
-            -hs, -hs, hs, c[0], c[1], c[2], -1 * f, 0, 0, 1, 1,
-            -hs, hs, hs, c[0], c[1], c[2], -1 * f, 0, 0, 1, 0,
+            -hs,  hs, -hs, c[0], c[1], c[2], -1 * f, 0, 0, 0, 0,//left
+            -hs, -hs,  hs, c[0], c[1], c[2], -1 * f, 0, 0, 1, 1,
+            -hs,  hs,  hs, c[0], c[1], c[2], -1 * f, 0, 0, 1, 0,
             -hs, -hs, -hs, c[0], c[1], c[2], -1 * f, 0, 0, 0, 1,
 
-            hs, hs, hs, c[0], c[1], c[2], 1 * f, 0, 0, 0, 0,//right
-            hs, -hs, -hs, c[0], c[1], c[2], 1 * f, 0, 0, 1, 1,
-            hs, hs, -hs, c[0], c[1], c[2], 1 * f, 0, 0, 1, 0,
-            hs, -hs, hs, c[0], c[1], c[2], 1 * f, 0, 0, 0, 1,
+             hs,  hs,  hs, c[0], c[1], c[2],  1 * f, 0, 0, 0, 0,//right
+             hs, -hs, -hs, c[0], c[1], c[2],  1 * f, 0, 0, 1, 1,
+             hs,  hs, -hs, c[0], c[1], c[2],  1 * f, 0, 0, 1, 0,
+             hs, -hs,  hs, c[0], c[1], c[2],  1 * f, 0, 0, 0, 1,
 
-            -hs, hs, -hs, c[0], c[1], c[2], 0, 1 * f, 0, 0, 0,//top
-            hs, hs, hs, c[0], c[1], c[2], 0, 1 * f, 0, 1, 1,
-            hs, hs, -hs, c[0], c[1], c[2], 0, 1 * f, 0, 1, 0,
-            -hs, hs, hs, c[0], c[1], c[2], 0, 1 * f, 0, 0, 1,
+            -hs,  hs, -hs, c[0], c[1], c[2], 0,  1 * f, 0, 0, 0,//top
+             hs,  hs,  hs, c[0], c[1], c[2], 0,  1 * f, 0, 1, 1,
+             hs,  hs, -hs, c[0], c[1], c[2], 0,  1 * f, 0, 1, 0,
+            -hs,  hs,  hs, c[0], c[1], c[2], 0,  1 * f, 0, 0, 1,
 
-            -hs, -hs, hs, c[0], c[1], c[2], 0, -1 * f, 0, 0, 0,//bottom
-            hs, -hs, -hs, c[0], c[1], c[2], 0, -1 * f, 0, 1, 1,
-            hs, -hs, hs, c[0], c[1], c[2], 0, -1 * f, 0, 1, 0,
+            -hs, -hs,  hs, c[0], c[1], c[2], 0, -1 * f, 0, 0, 0,//bottom
+             hs, -hs, -hs, c[0], c[1], c[2], 0, -1 * f, 0, 1, 1,
+             hs, -hs,  hs, c[0], c[1], c[2], 0, -1 * f, 0, 1, 0,
             -hs, -hs, -hs, c[0], c[1], c[2], 0, -1 * f, 0, 0, 1,
 
-            hs, hs, -hs, c[0], c[1], c[2], 0, 0, -1 * f, 0, 0,//back
+             hs,  hs, -hs, c[0], c[1], c[2], 0, 0, -1 * f, 0, 0,//back
             -hs, -hs, -hs, c[0], c[1], c[2], 0, 0, -1 * f, 1, 1,
-            -hs, hs, -hs, c[0], c[1], c[2], 0, 0, -1 * f, 1, 0,
-            hs, -hs, -hs, c[0], c[1], c[2], 0, 0, -1 * f, 0, 1];
+            -hs,  hs, -hs, c[0], c[1], c[2], 0, 0, -1 * f, 1, 0,
+             hs, -hs, -hs, c[0], c[1], c[2], 0, 0, -1 * f, 0, 1];
 
         gl.bindBuffer(gl.ARRAY_BUFFER, VBO);
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(anotherArray), gl.STATIC_DRAW);
@@ -107,72 +98,50 @@ function Cube(x, y, z, size, color, light,/**@type{Graphics} */ graphics, musicS
     this.update = function () {
 
         if (oldPower != 0) {
-            dp = power / oldPower / 1.5;
+            dp = power / oldPower;
         }
         if (power < Sound.data.frequency[musicSection] / 255) {
             power = Sound.data.frequency[musicSection] / 255;
         } else {
             if (power > 0)
-                power -= 0.1;
+                power -= 0.01;
             if (power < 0) {
                 power = 0;
             }
         }
 
 
-        beatPoints += dp;
+        beatPoints += Math.pow(dp, 10);
         if (beatPoints < 0) {
             beatPoints = 0;
         }
-        if (beatPoints > 5) {
+        if (beatPoints > 50) {
             beatPoints = 0;
-            color = Graphics.getNewLightColor();
+            if(light > -1){
+                color = Graphics.getNewLightColor();
+            }
+            
+            buildVBO();
         }
 
         scale = power * 5;
-        orbit += power * 0.5 * (maxDistance / orbitDistance);
-        orbit %= 360;
-        yOffset += power / 50;
-        orbitDistance += (power * power - 0.25) * 10 * (maxDistance / orbitDistance);
         rotation[0] += power * 2;
         rotation[1] += power * 2 + 0.1;
-        if (orbitDistance > maxDistance) {
-            orbitDistance = maxDistance;
-        } else if (orbitDistance < minDistance) {
-            orbitDistance = minDistance;
-        }
-        var nOrbit = orbit / 180 * Math.PI;
-        var nTilt = tilt / 180 * Math.PI;
-
-        oy = Math.sin(yOffset) * 1000 / (orbitDistance / 100);
-        // debugger;
-        var oldX = 0;
-        var oldY = 0;
-        var oldZ = 0;
-        x = orbitDistance * Math.cos(nOrbit);
-        y = 0;
-        z = orbitDistance * Math.sin(nOrbit);
-        oldX = x;
-        oldY = y;
-        x = oldX * Math.cos(nTilt) - oldY * Math.sin(nTilt);
-        y = oldX * Math.sin(nTilt) + oldY * Math.cos(nTilt) + oy;
-        oldX = x;
-        oldZ = z;
-        x = oldX * Math.cos(tiltOffset) - oldZ * Math.sin(tiltOffset) + ox;
-        z = oldX * Math.sin(tiltOffset) + oldZ * Math.cos(tiltOffset) + oz;
         buildModelMat();
         if (light > -1) {
             graphics.lightPos[light * 3] = x;
             graphics.lightPos[light * 3 + 1] = y;
             graphics.lightPos[light * 3 + 2] = z;
 
-            graphics.lightColor[light * 3] = color[0] * power + 0.1;
-            graphics.lightColor[light * 3 + 1] = color[1] * power + 0.1;
-            graphics.lightColor[light * 3 + 2] = color[2] * power + 0.1;
+            graphics.lightColor[light * 3] = color[0] * power * 2.0 + 0.1;
+            graphics.lightColor[light * 3 + 1] = color[1] * power * 2.0 + 0.1;
+            graphics.lightColor[light * 3 + 2] = color[2] * power * 2.0 + 0.1;
+            
         }
 
         oldPower = power;
     }
+    
     function buildModelMat() {
         var xr = rotation[0] * Math.PI / 180;
         var yr = rotation[1] * Math.PI / 180;
@@ -211,32 +180,129 @@ function Cube(x, y, z, size, color, light,/**@type{Graphics} */ graphics, musicS
     buildModelMat();
 }
 
+function Camera(){
+    var pos = {
+        x: 0,
+        y: 0,
+        z: 0
+    };
+
+    var target = {
+        x: 0,
+        y: 0,
+        z: 0
+    };
+    
+    var roll = 0; // In radians
+
+    this.setPosition = function(x, y, z){
+        pos.x = x;
+        pos.y = y;
+        pos.z = z;
+    }
+
+    this.setTarget = function(x, y, z){
+        target.x = x;
+        target.y = y;
+        target.z = z;
+    }
+
+    this.setRoll = function(angle, inDegrees = false){
+        roll = inDegrees ? angle * Math.PI / 180 : angle;
+    }
+
+    this.getMatrix = function(){
+        // calculate required x and y rotations
+        var xRotation = 0;
+        var yRotation = 0;
+        if(!(pos.x == target.x && pos.y == target.y && pos.z == target.z)){
+            // ensure target is not the same as position
+            var yPlaneVector = {
+                x: pos.x - target.x,
+                z: pos.z - target.z
+            }
+
+            var mag = Math.sqrt(yPlaneVector.x ** 2 + yPlaneVector.z ** 2);
+            if(mag != 0){
+                yRotation += yPlaneVector.x >= 0 ? Math.acos(yPlaneVector.z / mag) : -Math.acos(yPlaneVector.z / mag);
+            }
+
+            var xPlaneVector = {
+                y: pos.y - target.y,
+                z: Math.sqrt((pos.z - target.z) ** 2 + (pos.x - target.x) ** 2)
+            }
+            
+            var mag = Math.sqrt(xPlaneVector.y ** 2 + xPlaneVector.z ** 2);
+            if(mag != 0){
+                xRotation = xPlaneVector.y >= 0 ? -Math.acos(xPlaneVector.z / mag) : Math.acos(xPlaneVector.z / mag);
+            }
+            
+
+        }
+        //console.log(yRotation)
+
+        var xm = [
+            1, 0, 0, 0,
+            0, Math.cos(xRotation), -Math.sin(xRotation), 0,
+            0, Math.sin(xRotation), Math.cos(xRotation), 0,
+            0, 0, 0, 1
+        ];
+        var ym = [
+            Math.cos(yRotation), 0, Math.sin(yRotation), 0,
+            0, 1, 0, 0,
+            -Math.sin(yRotation), 0, Math.cos(yRotation), 0,
+            0, 0, 0, 1];
+        var zm = [
+            Math.cos(roll), -Math.sin(roll), 0, 0,
+            Math.sin(roll), Math.cos(roll), 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1];
+        // roll, rotate, translate
+        var camMat = Graphics.matrix.mult4x4(
+            [
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                -pos.x, -pos.y, -pos.z, 1
+            ], ym
+        );
+        camMat = Graphics.matrix.mult4x4(
+            camMat, xm
+        )
+        camMat = Graphics.matrix.mult4x4(
+            camMat, zm
+        )
+        return camMat;
+    }
+}
+
 function Graphics(){
     var canvas = document.createElement("canvas");
-    var gl = canvas.getContext("webgl", { preserveDrawingBuffer: true, alpha: false });
+    var gl = canvas.getContext("webgl", { preserveDrawingBuffer: false, alpha: false });
     var mySelf = this;
 
     var lightPos = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    var lightColor = [0.25, 0.25, 0.25, 0.5, 0.0, 0.0, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.0, 0.0, 0.5, 0.5, 0.0, 0.5, 0.0, 0.5, 0.5, 0.0, 0.0, 0.5];
+    var lightColor = [0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0,
+        0.0, 0.0, 0.0
+    ];
     
     this.lightPos = lightPos;
     this.lightColor = lightColor;
     var backgroundColor = [0, 0, 0];
     var backgroundColorGoal = [1, 1, 1];
     var lightScore = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var cDir = 1; // camera direction for temporary spiral
+    var cLoc = 0;
+    var cMax = 2000;
     var cubes = [];
 
-    var camera = {
-        height: 0,
-        target: {
-            x: 0,
-            y: 0,
-            z: -650
-        },
-        matrix: null,
-        angle: 0,
-        direction: 1
-    };
+    var camera = new Camera();
 
     var textures = {
         plainWhite: null, // texture 0
@@ -251,6 +317,7 @@ function Graphics(){
                 attribute vec2 tex;
                 attribute vec3 normal;
                 varying vec3 f_pos;
+                varying vec3 f_c_pos;
                 varying vec3 f_color;
                 varying vec3 f_normal;
                 varying vec2 f_tex;
@@ -262,12 +329,14 @@ function Graphics(){
                     f_color = color;
                     f_normal = normal_matrix * normal;
                     f_tex = tex;
-                    f_pos = (world*model * vec4(pos, 1.0)).xyz;
+                    f_pos = (model * vec4(pos, 1.0)).xyz;
+                    f_c_pos = (world * model * vec4(pos, 1.0)).xyz;
                     gl_Position=(perspective * world * model * vec4(pos, 1.0));
                 }`,
         mainFragmentShader: `
                 precision mediump float;
                 varying vec3 f_pos;
+                varying vec3 f_c_pos;
                 varying vec3 f_color;
                 varying vec3 f_normal;
                 varying vec2 f_tex;
@@ -283,7 +352,7 @@ function Graphics(){
                     float light_strength = 0.0;
                     float spec_strength = 0.0;
                     vec3 surface_to_light = vec3(0.0, 0.0, 0.0);
-                    vec3 surface_to_camera = normalize(-f_pos);
+                    vec3 surface_to_camera = normalize(-f_c_pos);
                     vec3 half_vector = vec3(0.0, 0.0, 0.0);
                     vec3 base = f_color * texture2D(texture, f_tex).rgb;
                     
@@ -298,7 +367,7 @@ function Graphics(){
 
                     total_light += ambient_color * base;
                     float amount = smoothstep(900.0, 1000.0, gl_FragCoord.z);
-                    gl_FragColor = vec4(mix(total_light,fog_color,amount),texture2D(texture,f_tex).a);
+                    gl_FragColor = vec4(mix(total_light,fog_color,amount),1.0);
                 }`,
         fadeVertexShader: `
                 attribute vec2 pos;
@@ -327,7 +396,7 @@ function Graphics(){
                     level = texture2D(freqData, textPos).r;
                     
                     wave = texture2D(freqData, textPos + vec2(0.0, 0.5)).r;
-                    fin = vec4(color.rgb * vec3(pow(level - abs(_pos.y * _pos.y + (wave * 2.0 - 1.0) * 0.1), 3.0) * 2.0), 0.5);
+                    fin = vec4(color.rgb * vec3(pow(level - abs(_pos.y * _pos.y + (wave * 2.0 - 1.0) * 0.1), 3.0) * 2.0), 1.0);
 
                     gl_FragColor = fin;
                 }`,
@@ -363,6 +432,30 @@ function Graphics(){
                 fin += vec4(color.rgb * vec3(pow(level - abs(_pos.x * _pos.x + (wave * 2.0 - 1.0) * 0.1), 3.0) * 2.0), 0.5);
                 fin.rgb *= 0.5;
                 gl_FragColor = fin;
+            }`,
+            bounusFadeFragmentShader: `
+                precision mediump float;
+                uniform sampler2D freqData;
+                uniform float opacity;
+                uniform vec3 color;
+                varying vec2 _pos;
+                vec4 fin;
+                float index;
+                vec2 textPos; 
+                float level;
+                float wave;
+                const float PI = 3.1415926535897932384626433832795;
+                void main(void){
+                    index = sqrt(_pos.x * _pos.x + _pos.y * _pos.y)/sqrt(2.0) * 512.0;
+                    textPos.y = floor(index / 32.0);
+                    textPos.x = index - textPos.y * 32.0;
+                    textPos.xy /= 32.0;
+                    wave = texture2D(freqData, textPos).r;
+                    
+                    level = texture2D(freqData, textPos + vec2(0.0, 0.5)).r;
+                    fin = vec4(color.rgb * vec3(pow(level, 3.0) * 2.0), 0.5);
+
+                    gl_FragColor = fin;
             }`
     }
 
@@ -545,34 +638,23 @@ function Graphics(){
 
         gl.useProgram(programs.main);
 
-        
-        camera.angle += camera.direction;
-        if (camera.angle > 90) {
-            camera.direction = -0.1;
+        cLoc += cDir;
+        if(cLoc < 0){
+            cDir = 1;
+        }else if (cLoc > cMax){
+            cDir = -1;
         }
-        if (camera.angle < -90) {
-            camera.direction = 0.1;
-        }
-        camera.height = -Math.sin(camera.angle / 180 * Math.PI) * 500;
-        var rot = Math.asin(camera.height / Math.sqrt(camera.height ** 2 + camera.target.z ** 2));
-        var camMatrix = [
-            1, 0, 0, 0,
-            0, Math.cos(rot), -Math.sin(rot), 0,
-            0, Math.sin(rot), Math.cos(rot), 0,
-            0, 0, 0, 1];
-        camMatrix = Graphics.matrix.mult4x4([
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, camera.height, 0, 1]
-            , camMatrix);
-        gl.uniformMatrix4fv(uniforms.main.world, false, camMatrix);
+        //camera.setPosition(performance.now() / 20 % 1000 - 500, performance.now() / 10 % 1000 - 500, performance.now() / 15 % 1000 - 500);
+        camera.setPosition(Math.sin(performance.now()/2000) * 300, Math.sin(performance.now()/6000) * 200, Math.sin(performance.now()/4000) * 300 - 450);
+        camera.setTarget(Math.cos(cLoc/cMax * 6 * Math.PI) * 300 * cLoc/cMax, 0, Math.sin(cLoc/cMax * 6 * Math.PI) * 300 * cLoc/cMax - 450);
+        camera.setRoll(performance.now()/2500);
+        gl.uniformMatrix4fv(uniforms.main.world, false, camera.getMatrix());
 
         gl.clearColor(lAvg[0], lAvg[1], lAvg[2], 1.0);
         gl.clear(gl.DEPTH_BUFFER_BIT);// TODO Make this change based on settings
 
-        gl.uniform3fv(uniforms.main.light_color, lightColor);
-        gl.uniform3fv(uniforms.main.light_pos, lightPos)
+        gl.uniform3fv(uniforms.main.light_color, this.lightColor);
+        gl.uniform3fv(uniforms.main.light_pos, this.lightPos)
         gl.uniform3fv(uniforms.main.ambient_color, [lAvg[0] / 8, lAvg[1] / 8, lAvg[2] / 8]);
         for (var i = 0; i < cubes.length; i++) {
             /**
@@ -613,7 +695,7 @@ function Graphics(){
     document.body.addEventListener('resize', this.resize);
 
     shaders.vertexShaders.fade = buildShader(shaderSources.fadeVertexShader, gl.VERTEX_SHADER);
-    shaders.fragmentShaders.fade = buildShader(shaderSources.altFadeFragmentShader, gl.FRAGMENT_SHADER);
+    shaders.fragmentShaders.fade = buildShader(shaderSources.fadeFragmentShader, gl.FRAGMENT_SHADER);
     programs.fade = buildProgram(shaders.vertexShaders.fade, shaders.fragmentShaders.fade);
     gl.useProgram(programs.fade);
     attributes.fade.pos = gl.getAttribLocation(programs.fade, "pos");
@@ -717,7 +799,7 @@ function Graphics(){
     // Start generating the cubes, TODO mabye seperate this into a different function?
     var chosenLights = [];
     var possibleList = [];
-    var numberOfCubes = 300;
+    var numberOfCubes = 200;
     cubes = [];
     for (var i = 0; i < numberOfCubes; i++) {
         possibleList.push(i);
@@ -730,10 +812,10 @@ function Graphics(){
     for (var i = 0; i < numberOfCubes; i++) {
         //Music slection, selects a value in the frquency array for this cube to read
         var ms = Math.floor(i / numberOfCubes * Sound.data.fbc);
-        var x = Math.random() * 150 - 75;
-        var y = Math.random() * 150 - 75;
-        var z = -Math.random() * 150 - 75;
-        var color = [Math.random(), Math.random(), Math.random()];
+        var x = Math.cos(i / numberOfCubes * Math.PI * 6) * 300 * i / numberOfCubes;// Math.random() * 150 - 75;
+        var y =0// Math.random() * 150 - 75;
+        var z =  Math.sin(i / numberOfCubes * Math.PI * 6) * 300 * i / numberOfCubes - 450;// -Math.random() * 150 - 75;
+        var color = [1, 1, 1]//[Math.random(), Math.random(), Math.random()];
         var l = -1;
         for (var j = 0; j < 8; j++) {
             if (chosenLights[j] == i) {
@@ -741,11 +823,10 @@ function Graphics(){
                 var c = j % 3
                 color = [0.0, 0.0, 0.0]
                 color[c] = j / 8 * 0.5 + 0.5;
-
                 break;
             }
         }
-        cubes.push(new Cube(x, y, z, Math.random() * 3 + 3, color, l, mySelf, ms));
+        cubes.push(new Cube(x, y, z, 3 + i / numberOfCubes * 20, color, l, mySelf, ms));
 
     }
 
